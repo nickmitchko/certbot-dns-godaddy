@@ -1,0 +1,51 @@
+name: certbot-dns-godaddy
+summary: godaddy Authenticator plugin for Certbot
+description: godaddy Authenticator plugin for Certbot
+confinement: strict
+grade: stable
+base: core20
+adopt-info: certbot-dns-godaddy
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+  - build-on: armhf
+
+parts:
+  certbot-dns-godaddy:
+    plugin: python
+    source: .
+    override-pull: |
+      snapcraftctl pull
+      snapcraftctl set-version "1.0"
+    build-environment:
+      - SNAP_BUILD: "True"
+    requirements:
+      - requirements.txt
+    build-packages:
+      - gcc
+      - git
+      - build-essential
+      - libssl-dev
+      - libffi-dev
+      - python3-dev
+      - cargo
+  certbot-metadata:
+    plugin: dump
+    source: .
+    stage: [ setup.py, certbot-shared ]
+    override-pull: |
+      snapcraftctl pull
+      mkdir -p $SNAPCRAFT_PART_SRC/certbot-shared
+
+slots:
+  certbot:
+    interface: content
+    content: certbot-1
+    read:
+      - $SNAP/lib/python3.8/site-packages
+
+plugs:
+  certbot-metadata:
+    interface: content
+    content: metadata-1
+    target: $SNAP/certbot-shared
